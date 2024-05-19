@@ -19,7 +19,7 @@ if __name__ == "__main__":
     log_rdd: RDD[str] = sc.textFile("data/log.txt")
 
     # check count
-    print(f"count of RDD ==> {log_rdd.count()}")
+    # print(f"count of RDD ==> {log_rdd.count()}")
 
 
     # line print test
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         status_code = row[3]
         return status_code == "404"
 
-    rdd_404 = parsed_log_rdd.filter(filter_404)
+    # rdd_404 = parsed_log_rdd.filter(filter_404)
     #rdd_404.foreach(print)
 
     # 2) status code가 정상인 경우 (2xx)만 필터
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         status_code = row[3]
         return status_code.startswith("2")
 
-    rdd_normal = parsed_log_rdd.filter(filter_2xx)
+    # rdd_normal = parsed_log_rdd.filter(filter_2xx)
     # rdd_normal.foreach(print)
 
     #3) post 요청이고 playbooks api의 로그인 필터링
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         log = row[2].replace("\"", "")
         return log.startswith("POST") and  "/playbooks" in log
 
-    rdd_post_playbooks = parsed_log_rdd.filter(get_post_request_and_playbooks_api)
+    # rdd_post_playbooks = parsed_log_rdd.filter(get_post_request_and_playbooks_api)
     # rdd_post_playbooks.foreach(print)
 
     # c reduce
@@ -67,9 +67,9 @@ if __name__ == "__main__":
         api_method = log.split(" ")[0]
         return api_method, 1
 
-    rdd_http_method_count = parsed_log_rdd.map(
-        get_counts_group_by_http_method
-    ).reduceByKey(lambda count1, count2: count1 + count2)
+    # rdd_http_method_count = parsed_log_rdd.map(
+    #     get_counts_group_by_http_method
+    # ).reduceByKey(lambda count1, count2: count1 + count2)
 
     # rdd_http_method_count.foreach(print)
 
@@ -81,9 +81,9 @@ if __name__ == "__main__":
 
         return f"{date_time_obj.hour}:{date_time_obj.minute}", 1
 
-    rdd_count_by_hour_minute = parsed_log_rdd.map(extract_hour_and_minute)\
-        .reduceByKey(lambda count1, count2: count1 + count2)\
-        .sortByKey()
+    # rdd_count_by_hour_minute = parsed_log_rdd.map(extract_hour_and_minute)\
+    #     .reduceByKey(lambda count1, count2: count1 + count2)\
+    #     .sortByKey()
 
     # rdd_count_by_hour_minute.foreach(print)
 
@@ -97,17 +97,18 @@ if __name__ == "__main__":
 
         return status_code, api_method, ip
 
-    result = parsed_log_rdd.map(get_ip_list_by_status_and_api_method)\
-        .map(lambda row: ((row[0], row[1]), row[2]))\
-        .groupByKey().mapValues(list)
+    # result = parsed_log_rdd.map(get_ip_list_by_status_and_api_method)\
+    #     .map(lambda row: ((row[0], row[1]), row[2]))\
+    #     .groupByKey().mapValues(list)
 
     # result.foreach(print)
 
     # reduceByKey
 
-    result = parsed_log_rdd.map(get_ip_list_by_status_and_api_method)\
+    result2 = parsed_log_rdd.map(get_ip_list_by_status_and_api_method)\
         .map(lambda row: ((row[0], row[1]), row[2]))\
-        .reduceByKey(lambda ip_list1, ip_list2: f"{ip_list1},{ip_list2}")
+        .reduceByKey(lambda ip_list1, ip_list2: f"{ip_list1},{ip_list2}")\
+        .map(lambda row: (row[0], row[1].split(",")))
 
     # result.foreach(print)
     # 작은 데이터의 경우 큰 상관없는데 큰 데이터의 경우 gropu by 보다
@@ -119,3 +120,8 @@ if __name__ == "__main__":
     # 수행한 이후 다른 익스큐터 들과 데이터 교환을 하기 때문에
     # 일반적으로 더 큰 데이터셋의 상황에서는 reduceByKey가 더 성능적으로 효율적이다.
 
+
+    result2.collect()
+
+    while True:
+        pass
