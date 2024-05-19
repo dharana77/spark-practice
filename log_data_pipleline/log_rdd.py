@@ -120,7 +120,6 @@ if __name__ == "__main__":
     # 수행한 이후 다른 익스큐터 들과 데이터 교환을 하기 때문에
     # 일반적으로 더 큰 데이터셋의 상황에서는 reduceByKey가 더 성능적으로 효율적이다.
 
-
     result2.collect()
 
     while True:
