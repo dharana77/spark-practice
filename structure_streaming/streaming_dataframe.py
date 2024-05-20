@@ -81,7 +81,7 @@ if __name__ == "__main__":
                     .format("csv")\
                     .option("header", "false")\
                     .schema(schemas)\
-                    .load("data/")
+                    .load("data/logs")
 
         logs_df.writeStream\
                 .format("console")\
